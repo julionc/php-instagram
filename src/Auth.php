@@ -21,47 +21,34 @@ use GuzzleHttp\Post\PostBody;
 class Auth
 {
     /**
-     * The authorization url for the Instagram API
-     *
-     * @var string $auth_url
+     * Config
+     * @var array
      */
-    protected $auth_url;
+    protected $config = array();
 
     /**
-     * The Client Id
+     * Token
      * @var string
      */
-    protected $client_id;
+    protected $token;
 
     /**
-     * The Client Secret
-     * @var string
-     */
-    protected $client_secret;
-
-    /**
-     * The Redirect URI
-     * @var string
-     */
-    protected $redirect_uri;
-
-    /**
-     * Scope
-     * @var string
-     */
-    protected $scope;
-
-    /**
-     * The Construct
+     * Constructor
      *
      * @param array $config
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config)
     {
-        $this->client_id = $config['client_id'] ?: getenv('instagram.client_id');
-        $this->client_secret = $config['client_secret'] ?: getenv('instagram.client_secret');
-        $this->redirect_uri = $config['redirect_uri'] ?: getenv('instagram.redirect_uri');
-        $this->scope = $config['scope'] ?: array('basic');
+        // Env variables
+        if (!array_key_exists('client_id', $config)) {
+            $config['client_id'] = getenv('instagram.client_id');
+        }
+
+        if (!array_key_exists('client_secret', $config)) {
+            $config['client_secret'] = getenv('instagram.client_secret');
+        }
+
+        $this->config = $config;
     }
 
     /**
@@ -71,11 +58,11 @@ class Auth
      */
     public function authorize_url()
     {
-        $_scope = $this->scope;
+        $_scope = $this->config['scope'];
 
         $data = array(
-            'client_id' => $this->client_id,
-            'redirect_uri' => $this->redirect_uri,
+            'client_id' => $this->config['client_id'],
+            'redirect_uri' => $this->config['redirect_uri'],
             'scope' => reset($_scope),
             'response_type' => 'code'
         );
@@ -90,23 +77,23 @@ class Auth
     }
 
     /**
-     * Generate OAuth Token
+     * Request Access Token
      *
      * @param string $code The Access code
      * @return string
      * @throws \Exception
      */
-    public function generateOAuthToken($code)
+    public function requestAccessToken($code)
     {
         if (!$code) {
             throw new \Exception('Your Instagram Access code is not set.');
         }
 
         $body = [
-            'client_id' => $this->client_id,
-            'client_secret' => $this->client_secret,
+            'client_id' => $this->config['client_id'],
+            'client_secret' => $this->config['client_secret'],
             'grant_type' => 'authorization_code',
-            'redirect_uri' => $this->redirect_uri,
+            'redirect_uri' => $this->config['redirect_uri'],
             'code' => $code
         ];
 
@@ -117,9 +104,26 @@ class Auth
 
         $client = new Client();
         $response = $client->post('https://api.instagram.com/oauth/access_token', $options);
-        $obj = $response->json();
 
-        return $obj['access_token'];
+        $data = json_decode($response->getBody());
+
+        if (empty($data)) {
+            throw new \RuntimeException('Unable to parse access token JSON data from Instagram API');
+        }
+
+        $this->token = $data->access_token;
+
+        return $data;
+    }
+
+    /**
+     * Retrieve Access Token
+     *
+     * @return string
+     */
+    public function getAccessToken()
+    {
+        return $this->token;
     }
 
 }

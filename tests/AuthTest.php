@@ -27,9 +27,11 @@ class AuthTest extends \PHPUnit_Framework_TestCase
     {
         putenv('instagram.client_id=YOUR_CLIENT_ID');
         putenv('instagram.client_secrect=YOUR_CLIENT_SECRET');
-        putenv('instagram.redirect_uri=CALLBACK_URL');
+        $config = $this->getDefaultConfig();
+        unset($config['client_id']);
+        unset($config['secret_id']);
 
-        $client = new Instagram\Auth();
+        $client = new Instagram\Auth($config);
         $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl());
     }
 
@@ -42,7 +44,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl($config['scope']));
     }
 
-    public function testGenerateOAuthToken()
+    public function testRequestAccessToken()
     {
         $client = $this->getMockBuilder('\Instagram\Auth')
             ->setMethods(array('__construct'))
@@ -50,8 +52,8 @@ class AuthTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $client->generateOAuthToken = 'fb2e77d.47a0479900504cb3ab4a1f626d174d2d';
-        $token = $client->generateOAuthToken;
+        $client->requestAccessToken = 'fb2e77d.47a0479900504cb3ab4a1f626d174d2d';
+        $token = $client->requestAccessToken;
 
         $mock = $this->getMockResponse('dump');
         $obj = json_decode($mock);
