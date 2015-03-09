@@ -11,6 +11,9 @@
 
 namespace Instagram;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Post\PostBody;
+
 /**
  * Instagram Auth
  * @package Instagram
@@ -68,15 +71,55 @@ class Auth
      */
     public function authorize_url()
     {
-        $url = 'https://api.instagram.com/oauth/authorize/?';
+        $_scope = $this->scope;
+
         $data = array(
             'client_id' => $this->client_id,
             'redirect_uri' => $this->redirect_uri,
-            'scope' => implode(' ', $this->scope),
+            'scope' => reset($_scope),
             'response_type' => 'code'
         );
 
-        return $url . http_build_query($data);
+        if (count($_scope) !== 1) {
+            $data['scope'] = implode(" ", $_scope);
+        }
+
+        $url = 'https://api.instagram.com/oauth/authorize/?' . http_build_query($data);
+
+        return $url;
+    }
+
+    /**
+     * Generate OAuth Token
+     *
+     * @param string $code The Access code
+     * @return string
+     * @throws \Exception
+     */
+    public function generateOAuthToken($code)
+    {
+        if (!$code) {
+            throw new \Exception('Your Instagram Access code is not set.');
+        }
+
+        $body = [
+            'client_id' => $this->client_id,
+            'client_secret' => $this->client_secret,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $this->redirect_uri,
+            'code' => $code
+        ];
+
+        $options = [
+            'body' => $body,
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded']
+        ];
+
+        $client = new Client();
+        $response = $client->post('https://api.instagram.com/oauth/access_token', $options);
+        $obj = $response->json();
+
+        return $obj['access_token'];
     }
 
 }

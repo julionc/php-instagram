@@ -11,22 +11,16 @@
 
 namespace Instagram\Tests;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Subscriber\Mock;
 use Instagram;
 
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
-    protected $auth_url;
-
-    public function setUp()
-    {
-        $this->auth_url = $this->buildUrl();
-    }
-
     public function testAuthWithConfigArray()
     {
-        $client = new Instagram\Auth($this->getConfig());
-
-        $this->assertEquals($client->authorize_url(), $this->auth_url);
+        $client = new Instagram\Auth($this->getDefaultConfig());
+        $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl());
     }
 
     public function testAuthWithEnvironmentVariables()
@@ -36,56 +30,71 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         putenv('instagram.redirect_uri=CALLBACK_URL');
 
         $client = new Instagram\Auth();
-
-        $this->assertEquals($client->authorize_url(), $this->auth_url);
+        $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl());
     }
 
-    public function testAuthWithMoreScope()
+    public function testAuthWithMoreScopes()
     {
-        $config = $this->getConfig();
+        $config = $this->getDefaultConfig();
         $config['scope'] = array('basic', 'comments', 'relationships', 'likes');
 
         $client = new Instagram\Auth($config);
-        $auth_url = $this->buildUrl($config);
-
-        $this->assertEquals($client->authorize_url(), $auth_url);
+        $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl($config['scope']));
     }
 
-    private function getConfig()
+    public function testGenerateOAuthToken()
+    {
+        $client = $this->getMockBuilder('\Instagram\Auth')
+            ->setMethods(array('__construct'))
+            ->setConstructorArgs($this->getDefaultConfig())
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $client->generateOAuthToken = 'fb2e77d.47a0479900504cb3ab4a1f626d174d2d';
+        $token = $client->generateOAuthToken;
+
+        $mock = $this->getMockResponse('dump');
+        $obj = json_decode($mock);
+
+        $this->assertEquals($token, $obj->access_token);
+
+    }
+
+    private function getDefaultConfig()
     {
         return array(
             'client_id' => 'YOUR_CLIENT_ID',
             'client_secret' => 'YOUR_CLIENT_SECRET',
             'redirect_uri' => 'CALLBACK_URL',
-
+            'scope' => array('basic')
         );
     }
 
-    private function buildUrl(array $data = [])
+    private function getDefaultAuthorizeUrl($scope = 'basic')
     {
-        $_default = array(
-            'client_id' => 'YOUR_CLIENT_ID',
-            'redirect_uri' => 'CALLBACK_URL',
-            'scope' => 'basic',
-            'response_type' => 'code'
-        );
-
-        if (empty($data)) {
-            $data = $_default;
-        } else {
-
-            $_scope = $data['scope'];
-            if (is_array($_scope)) {
-                $scope = implode(' ', $data['scope']);
-                $data['scope'] = $scope;
-            }
-
-            $data = array_replace($_default, $data);
+        if (is_array($scope)) {
+            $scope = implode("+", $scope);
         }
 
-        unset($data['client_secret']);
-        $url = 'https://api.instagram.com/oauth/authorize/?';
+        $result = 'https://api.instagram.com/oauth/authorize/';
+        $result .= '?client_id=YOUR_CLIENT_ID';
+        $result .= '&redirect_uri=CALLBACK_URL';
+        $result .= '&scope=' . $scope;
+        $result .= '&response_type=code';
 
-        return $url . http_build_query($data);
+        return $result;
+    }
+
+    protected function getMockResponse($file_name)
+    {
+        $client = new Client();
+
+        $mock = new Mock();
+        $mock->addResponse(__DIR__ . '/mocks/' . $file_name . '.txt');
+
+        $client->getEmitter()->attach($mock);
+        $response = $client->get();
+
+        return $response->getBody()->getContents();
     }
 }
