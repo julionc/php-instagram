@@ -11,64 +11,14 @@
 
 namespace Instagram\Tests;
 
-use Instagram;
-use GuzzleHttp\Client;
-use GuzzleHttp\Subscriber\Mock;
-use GuzzleHttp\Subscriber\History;
+require_once 'TestCase.php';
 
-class UserTest extends \PHPUnit_Framework_TestCase
+class UserTest extends TestCase
 {
-    protected $instagram;
-    protected $client;
-    protected $history;
-
-    public function setUp()
-    {
-        $reflected = new \ReflectionClass('Instagram\Instagram');
-
-        $this->history = new History();
-
-        $this->instagram = new Instagram\Instagram('random');
-
-        $this->client = $reflected->getProperty('api');
-        $this->client->setAccessible(true);
-        $this->client->setValue($this->instagram, new Client());
-        $this->client->getValue($this->instagram)->getEmitter()->attach($this->history);
-    }
-
-    protected function mock($mock)
-    {
-        $mock = new Mock($mock);
-        $this->client->getValue($this->instagram)->getEmitter()->attach($mock);
-    }
-
-    protected function dataResponse($file_name)
-    {
-        $body = $this->getFixtureData($file_name);
-        $response = [
-            'HTTP/1.1 200 OK',
-            'Content-Length: ' . strlen($body),
-            '',
-            $body,
-        ];
-
-        return implode("\r\n", $response);
-    }
-
-    protected function getFixtureData($file_name)
-    {
-        $file = __DIR__ . '/fixtures/' . $file_name . '.json';
-        if (!file_exists($file)) {
-            throw new \Exception('You must specify a correct Fixture file name.');
-        }
-
-        return file_get_contents($file);
-    }
-
     public function testUserInfo()
     {
         $this->mock([
-            $this->dataResponse('self'),
+            $this->dataResponse('self')
         ]);
 
         $response = $this->instagram->user()->info();
@@ -78,4 +28,18 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Snoop Dogg', $response->full_name);
     }
 
+    public function testUserFeed()
+    {
+        $this->mock([
+            $this->dataResponse('user-feed')
+        ]);
+
+        $response = $this->instagram->user()->feed();
+
+        $image = $response[0]; // First item
+
+        $this->assertInternalType('array', $response);
+        $this->assertEquals('image', $image->type);
+        $this->assertEquals('http://instagr.am/p/BXsFz/', $image->link);
+    }
 }

@@ -17,7 +17,8 @@ use GuzzleHttp\Client;
  * Instagram
  * @package Instagram
  *
- * @method array info(string $nothing)
+ * @method $this info()
+ * @method $this feed()
  */
 class Instagram
 {
@@ -59,7 +60,7 @@ class Instagram
         return $this;
     }
 
-    public function send($request)
+    protected function send($request)
     {
         if (empty($this->user)) {
             throw new \Exception('You must specify the user to send API calls.');
