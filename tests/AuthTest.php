@@ -92,7 +92,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $client = new Client();
 
         $mock = new Mock();
-        $mock->addResponse(__DIR__ . '/mocks/' . $file_name . '.txt');
+        $mock->addResponse(__DIR__ . '/fixtures/' . $file_name . '.txt');
 
         $client->getEmitter()->attach($mock);
         $response = $client->get();
