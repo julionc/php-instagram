@@ -66,19 +66,19 @@ class Instagram
             throw new \Exception('You must specify the user to send API calls.');
         }
 
-        $response = $this->sendRequest($request);
+        $method = $request['method'];
+        $url = $this->api->getBaseUrl() . $request['url'];
+        $options = $request['options'] ?: [];
+
+        $response = $this->sendRequest($method, $url, $options);
         $data = $response['data'];
         $this->user = '';
 
         return json_decode(json_encode($data), false);
     }
 
-    protected function sendRequest($data)
+    protected function sendRequest($method, $url, array $options = [])
     {
-        $method = $data['method'];
-        $url = $this->api->getBaseUrl() . $data['url'];
-        $options = $data['options'] ?: [];
-
         $request = $this->api->createRequest($method, $url, $options);
         $response = $this->api->send($request);
 

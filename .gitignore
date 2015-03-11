@@ -4,5 +4,4 @@
 composer.phar
 composer.lock
 phpunit.xml
-example/
 example/config.php
