@@ -11,14 +11,12 @@
 
 namespace Instagram;
 
-use GuzzleHttp\Client;
+use Instagram\Request\User;
 
 /**
  * Instagram
  * @package Instagram
  *
- * @method $this info()
- * @method $this feed()
  */
 class Instagram
 {
@@ -51,7 +49,7 @@ class Instagram
     /**
      * Set the passed in user
      *
-     * @return \Instagram\Instagram
+     * @return \Instagram\Request\User
      */
     public function user()
     {
@@ -72,7 +70,7 @@ class Instagram
 
         $response = $this->sendRequest($method, $url, $options);
         $data = $response['data'];
-        $this->user = '';
+        $this->user = null;
 
         return json_decode(json_encode($data), false);
     }
@@ -87,16 +85,21 @@ class Instagram
 
     public function __call($method, $arguments)
     {
-        $request_class = 'Instagram\Request\User' . ucwords($method);
-        array_unshift($arguments, $this->user, $this->getToken());
+        if ($this->user) {
 
-        if (class_exists($request_class)) {
-            $class = new \ReflectionClass($request_class);
-            $request = $class->newInstanceArgs($arguments);
+            $defaults = [$this->user, $this->getToken()];
 
-            return $this->send($request->request());
+            $class = new \ReflectionClass('Instagram\Request\User');
+            $object = $class->newInstanceArgs($defaults);
+
+            if (method_exists($object, $method)) {
+                $reflect_method = new \ReflectionMethod($object, $method);
+                $request = $reflect_method->invokeArgs($object, $arguments);
+
+                return $this->send($request);
+            }
+            throw new \Exception('Unknown method "' . $method . '"');
         }
-        throw new \Exception('Unknown method "' . $method . '"');
     }
 
 }
