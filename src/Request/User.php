@@ -11,38 +11,28 @@
 
 namespace Instagram\Request;
 
-class User
+class User extends Request
 {
-    protected $user;
-    protected $token;
-
-    public function __construct($user, $token)
-    {
-        $this->user = $user;
-        $this->token = $token;
-    }
-
     public function info()
     {
-        $request['method'] = 'GET';
         $request['url'] = sprintf(
             '/users/%s/?access_token=%s',
-            $this->user,
-            $this->token
+            $this->getUser(),
+            $this->getToken()
         );
 
-        return $request;
+        return array_merge($request, $this->request);
     }
 
     public function feed()
     {
-        $request['method'] = 'GET';
         $request['url'] = sprintf(
             '/users/self/feed?access_token=%s',
-            $this->user,
-            $this->token
+            $this->getUser(),
+            $this->getToken()
         );
 
-        return $request;
+        return array_merge($request, $this->request);
     }
+
 }

@@ -66,7 +66,7 @@ class Instagram
 
         $method = $request['method'];
         $url = $this->api->getBaseUrl() . $request['url'];
-        $options = $request['options'] ?: [];
+        $options = isset($request['options']) ? $request['options'] : [];
 
         $response = $this->sendRequest($method, $url, $options);
         $data = $response['data'];

@@ -13,17 +13,25 @@ namespace Instagram\Request;
 
 abstract class Request
 {
-    protected $method = 'GET';
-    protected $url;
-    protected $options = [];
+    protected $options;
+    protected $request = [
+        'method' => 'GET',
+        'options' => [],
+    ];
 
-    public function request()
+    public function __construct($user, $token)
     {
-        $request = [
-            'method' => $this->method,
-            'url' => $this->url
-        ];
+        $this->options['user'] = $user;
+        $this->options['token'] = $token;
+    }
 
-        return array_merge($request, $this->options);
+    public function getUser()
+    {
+        return $this->options['user'];
+    }
+
+    public function getToken()
+    {
+        return $this->options['token'];
     }
 }
