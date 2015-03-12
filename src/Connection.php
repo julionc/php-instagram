@@ -35,9 +35,8 @@ class Connection
     protected $client;
 
     /**
-     * Get the Guzzle client with defaults
-     *
-     * @return \GuzzleHttp\Client
+     * Constructor
+     * @param string $access_token The Instagram Access token
      */
     public function __construct($access_token)
     {
@@ -52,6 +51,11 @@ class Connection
         ]);
     }
 
+    /**
+     * Get the Guzzle client with defaults
+     *
+     * @return \GuzzleHttp\Client
+     */
     public function client()
     {
         return $this->client;

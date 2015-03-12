@@ -11,8 +11,6 @@
 
 namespace Instagram;
 
-use Instagram\Request\User;
-
 /**
  * Instagram
  * @package Instagram
@@ -30,7 +28,6 @@ class Instagram
     protected $token;
 
     protected $user;
-
 
     public function __construct($access_token)
     {

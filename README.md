@@ -5,7 +5,9 @@ A PHP library for the Instagram API
 ## Table of Contents
 
 + [Installation](#installation)
-+ [Get Oauth Access Token](#get-oauth-access-token)
++ [How to Use](#how-to-use)
++ [EndPoints](#endpoints)
+  + [User](#user)
 
 ## Installation
 
@@ -18,6 +20,7 @@ Using [composer](https://packagist.org/packages/julionc/instagram):
     }
 }
 ```
+## How to Use
 
 ```php
 require_once('vendor/autoload.php');
@@ -31,19 +34,16 @@ $config = array(
 
 $client = new Instagram\Auth($config);
 
-// Get the Authorize Url
-// $client->authorize_url();
-```
+// In view, get the Authorize URL
 
+$client->authorize_url();
+```
 
 ```php
 // profile.php
-
-$client = new Instagram\Auth($config);
-$client->requestAccessToken($access_code);
+// Preload the settings and capture the access code (Callback step).
 
 if (!$access_token) {
-    $config = require_once 'config.php';
     $client = new Instagram\Auth($config);
     $client->requestAccessToken($access_code);
     $_SESSION['access_token'] = $client->getAccessToken();
@@ -51,8 +51,26 @@ if (!$access_token) {
 
 $instagram = new \Instagram\Instagram($access_token);
 
-$user = $instagram->user()->info();
-
 ```
 
-If you do not wish to put your access token in your code (understandable), simply set it to the environment variable `instagram.client_id` and `instagram.client_secrect`. So php-instagram will automatically pick it up.
+If you do not wish to put your client credentials in your code (understandable), simply set it to the environment variable `instagram.client_id` and `instagram.client_secrect`.
+So php-instagram will automatically pick it up.
+
+# EndPoints
+
+## User
+
+```php
+$instagram = new \Instagram\Instagram($access_token);
+
+// Get basic information about a user.
+$user = $instagram->user->info();
+
+// See the authenticated user's feed.
+$feed = $instagram->user->feed();
+
+// Get the most recent media published by a user.
+
+$media = $instagram->user->media();
+
+```
