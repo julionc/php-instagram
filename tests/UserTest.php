@@ -18,7 +18,7 @@ class UserTest extends TestCase
     public function testUserInfo()
     {
         $this->mock([
-            $this->dataResponse('self')
+            $this->dataResponse('user/self')
         ]);
 
         $response = $this->instagram->user()->info();
@@ -31,7 +31,7 @@ class UserTest extends TestCase
     public function testUserFeed()
     {
         $this->mock([
-            $this->dataResponse('user-feed')
+            $this->dataResponse('user/feed')
         ]);
 
         $response = $this->instagram->user()->feed();
@@ -42,4 +42,13 @@ class UserTest extends TestCase
         $this->assertEquals('image', $image->type);
         $this->assertEquals('http://instagr.am/p/BXsFz/', $image->link);
     }
+
+    /*
+    public function testUserMedia()
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
+    }
+    */
 }

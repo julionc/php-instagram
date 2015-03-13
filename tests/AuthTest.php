@@ -11,25 +11,25 @@
 
 namespace Instagram\Tests;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Subscriber\Mock;
 use Instagram;
 
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
     public function testAuthWithConfigArray()
     {
-        $client = new Instagram\Auth($this->getDefaultConfig());
+        $config = $this->getDefaultConfig();
+        $client = new Instagram\Auth($config);
         $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl());
     }
 
     public function testAuthWithEnvironmentVariables()
     {
-        putenv('instagram.client_id=YOUR_CLIENT_ID');
-        putenv('instagram.client_secrect=YOUR_CLIENT_SECRET');
         $config = $this->getDefaultConfig();
         unset($config['client_id']);
         unset($config['secret_id']);
+
+        putenv('instagram.client_id=YOUR_CLIENT_ID');
+        putenv('instagram.client_secrect=YOUR_CLIENT_SECRET');
 
         $client = new Instagram\Auth($config);
         $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl());
@@ -42,24 +42,6 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
         $client = new Instagram\Auth($config);
         $this->assertEquals($client->authorize_url(), $this->getDefaultAuthorizeUrl($config['scope']));
-    }
-
-    public function testRequestAccessToken()
-    {
-        $client = $this->getMockBuilder('\Instagram\Auth')
-            ->setMethods(array('__construct'))
-            ->setConstructorArgs($this->getDefaultConfig())
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $client->requestAccessToken = 'fb2e77d.47a0479900504cb3ab4a1f626d174d2d';
-        $token = $client->requestAccessToken;
-
-        $mock = $this->getMockResponse('dump');
-        $obj = json_decode($mock);
-
-        $this->assertEquals($token, $obj->access_token);
-
     }
 
     private function getDefaultConfig()
@@ -85,18 +67,5 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $result .= '&response_type=code';
 
         return $result;
-    }
-
-    protected function getMockResponse($file_name)
-    {
-        $client = new Client();
-
-        $mock = new Mock();
-        $mock->addResponse(__DIR__ . '/fixtures/' . $file_name . '.txt');
-
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
-
-        return $response->getBody()->getContents();
     }
 }

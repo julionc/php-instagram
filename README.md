@@ -16,7 +16,7 @@ Using [composer](https://packagist.org/packages/julionc/instagram):
 ```
 {
     "require": {
-        "julionc/instagram": "*"
+        "julionc/instagram": "dev-master"
     }
 }
 ```
@@ -35,7 +35,6 @@ $config = array(
 $client = new Instagram\Auth($config);
 
 // In view, get the Authorize URL
-
 $client->authorize_url();
 ```
 
@@ -49,12 +48,13 @@ if (!$access_token) {
     $_SESSION['access_token'] = $client->getAccessToken();
 }
 
-$instagram = new \Instagram\Instagram($access_token);
+$instagram = new \Instagram\Instagram($access_token, 'secret_key_here');
 
 ```
 
 If you do not wish to put your client credentials in your code (understandable), simply set it to the environment variable `instagram.client_id` and `instagram.client_secrect`.
 So php-instagram will automatically pick it up.
+See `example` folder.
 
 # EndPoints
 
@@ -70,7 +70,6 @@ $user = $instagram->user->info();
 $feed = $instagram->user->feed();
 
 // Get the most recent media published by a user.
-
 $media = $instagram->user->media();
 
 ```

@@ -32,13 +32,19 @@ class Connection
      * @var string $version
      */
     protected $version = 'v1';
+
+    /**
+     * An instance of the Guzzle client
+     *
+     * @var \GuzzleHttp\Client $client
+     */
     protected $client;
 
     /**
      * Constructor
      * @param string $access_token The Instagram Access token
      */
-    public function __construct($access_token)
+    public function __construct($access_token = '')
     {
         $this->client = new Client([
             'base_url' => [

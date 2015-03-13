@@ -28,7 +28,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->history = new History();
 
-        $this->instagram = new Instagram\Instagram('random');
+        $this->instagram = new Instagram\Instagram('random', 'secret_key');
 
         $this->client = $reflected->getProperty('api');
         $this->client->setAccessible(true);

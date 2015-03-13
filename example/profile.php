@@ -20,16 +20,20 @@ if (!$access_code) {
     header('Location: index.php');
 }
 
+$config = require_once 'config.php';
+
 if (!$access_token) {
-    $config = require_once 'config.php';
     $client = new Instagram\Auth($config);
     $client->requestAccessToken($access_code);
     $_SESSION['access_token'] = $client->getAccessToken();
 }
 
-$instagram = new \Instagram\Instagram($access_token);
+$instagram = new \Instagram\Instagram($access_token, $config['client_secret']);
 
 $user = $instagram->user()->info();
+
+$follows = $instagram->user()->follows();
+$followers = $instagram->user()->followers();
 
 ?>
 <html>
@@ -49,10 +53,20 @@ $user = $instagram->user()->info();
     </tr>
 </table>
 <hr/>
+<h3>Info</h3>
 <pre>
     <?php print_r($user); ?>
 </pre>
 <hr/>
+<h3>Follows</h3>
+<pre>
+    <?php print_r($follows); ?>
+</pre>
+<hr/>
+<h3>Followers</h3>
+<pre>
+    <?php print_r($followers); ?>
+</pre>
 
 </body>
 </html>

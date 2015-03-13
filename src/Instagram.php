@@ -25,22 +25,35 @@ class Instagram
      */
     protected $api;
 
-    protected $token;
-
     protected $user;
+    protected $token;
+    protected $client_secret;
 
-    public function __construct($access_token)
+    public function __construct($access_token, $client_secret = null)
     {
+        $client_secret = getenv('instagram.client_secret') ?: $client_secret;
+
         if (!$access_token) {
             throw new \Exception('Your Instagram Access Token is not set.');
         }
+
+        if (!$client_secret) {
+            throw new \Exception('Your Instagram Client Secret key is not set.');
+        }
+
         $this->token = $access_token;
+        $this->client_secret = $client_secret;
         $this->api = (new Connection($access_token))->client();
     }
 
     public function getToken()
     {
         return $this->token;
+    }
+
+    public function getClientSecret()
+    {
+        return $this->client_secret;
     }
 
     /**
@@ -50,7 +63,7 @@ class Instagram
      */
     public function user()
     {
-        $this->user = func_get_args() ?: 'self';
+        $this->user = func_get_args() ? reset(func_get_args()) : 'self';
 
         return $this;
     }
@@ -65,6 +78,13 @@ class Instagram
         $url = $this->api->getBaseUrl() . $request['url'];
         $options = isset($request['options']) ? $request['options'] : [];
 
+        if ('POST' === $method) {
+            $signed_header = $this->getSignedHeader();
+            $options['headers'] = [
+                'X-Insta-Forwarded-For' => $signed_header
+            ];
+        }
+
         $response = $this->sendRequest($method, $url, $options);
         $data = $response['data'];
         $this->user = null;
@@ -74,10 +94,21 @@ class Instagram
 
     protected function sendRequest($method, $url, array $options = [])
     {
+        //echo "<br/>URL: " . $url;
         $request = $this->api->createRequest($method, $url, $options);
         $response = $this->api->send($request);
 
         return $response->json();
+    }
+
+    protected function getSignedHeader()
+    {
+        $ips = $_SERVER['SERVER_ADDR'] ?: '127.0.0.1';
+        $secret = $this->getClientSecret();
+
+        $signature = (hash_hmac('sha256', $ips, $secret, false));
+        $header = join('|', array($ips, $signature));
+        return $header;
     }
 
     public function __call($method, $arguments)
