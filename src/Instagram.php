@@ -94,7 +94,6 @@ class Instagram
 
     protected function sendRequest($method, $url, array $options = [])
     {
-        //echo "<br/>URL: " . $url;
         $request = $this->api->createRequest($method, $url, $options);
         $response = $this->api->send($request);
 

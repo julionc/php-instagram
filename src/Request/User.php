@@ -19,6 +19,7 @@ class User extends Request
 {
     public function info()
     {
+        $request = [];
         $request['url'] = sprintf(
             'users/%s/?access_token=%s',
             $this->getUser(),
@@ -30,6 +31,7 @@ class User extends Request
 
     public function feed()
     {
+        $request = [];
         $request['url'] = sprintf(
             'users/self/feed?access_token=%s',
             $this->getUser(),
@@ -43,6 +45,7 @@ class User extends Request
 
     public function follows()
     {
+        $request = [];
         $request['url'] = sprintf(
             'users/%s/follows?access_token=%s',
             $this->getUser(),
@@ -54,6 +57,7 @@ class User extends Request
 
     public function followers()
     {
+        $request = [];
         $request['url'] = sprintf(
             'users/%s/followed-by?access_token=%s',
             $this->getUser(),
