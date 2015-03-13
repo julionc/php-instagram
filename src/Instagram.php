@@ -103,11 +103,12 @@ class Instagram
 
     protected function getSignedHeader()
     {
-        $ips = $_SERVER['SERVER_ADDR'] ?: '127.0.0.1';
+        $ips = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '127.0.0.1';
         $secret = $this->getClientSecret();
 
         $signature = (hash_hmac('sha256', $ips, $secret, false));
         $header = join('|', array($ips, $signature));
+
         return $header;
     }
 
