@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Instagram\Request;
+namespace Instagram\Resources;
 
 /**
  * User
- * @package Instagram\Request
+ * @package Instagram\Resources
  */
 class User extends Request
 {

@@ -59,7 +59,7 @@ class Instagram
     /**
      * Set the passed in user
      *
-     * @return \Instagram\Request\User
+     * @return \Instagram\Resources\User
      */
     public function user()
     {
@@ -117,7 +117,7 @@ class Instagram
 
             $defaults = [$this->user, $this->getToken()];
 
-            $class = new \ReflectionClass('Instagram\Request\User');
+            $class = new \ReflectionClass('Instagram\Resources\User');
             $object = $class->newInstanceArgs($defaults);
 
             if (method_exists($object, $method)) {
