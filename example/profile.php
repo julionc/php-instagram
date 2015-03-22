@@ -25,7 +25,8 @@ $config = require_once 'config.php';
 if (!$access_token) {
     $client = new Instagram\Auth($config);
     $client->requestAccessToken($access_code);
-    $_SESSION['access_token'] = $client->getAccessToken();
+    $access_token = $client->getAccessToken();
+    $_SESSION['access_token'] = $access_token;
 }
 
 $instagram = new \Instagram\Instagram($access_token, $config['client_secret']);
@@ -34,6 +35,7 @@ $user = $instagram->user()->info();
 
 $follows = $instagram->user()->follows();
 $followers = $instagram->user()->followers();
+$feed = $instagram->user()->feed();
 
 ?>
 <html>
@@ -68,5 +70,21 @@ $followers = $instagram->user()->followers();
     <?php print_r($followers); ?>
 </pre>
 
+<hr/>
+<h3>Media</h3>
+<pre>
+    <?php //print_r($feed); ?>
+</pre>
+
+<?php
+
+foreach ($feed as $media) {
+    if ($media->type === 'image') {
+        $image = $media->images->low_resolution->url;
+        echo '<img src="' . $image . '">';
+    }
+}
+
+?>>
 </body>
 </html>

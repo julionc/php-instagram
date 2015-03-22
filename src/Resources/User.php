@@ -33,7 +33,7 @@ class User extends Request
     {
         $request = [];
         $request['url'] = sprintf(
-            'users/self/feed?access_token=%s',
+            'users/%s/feed?access_token=%s',
             $this->getUser(),
             $this->getToken()
         );
