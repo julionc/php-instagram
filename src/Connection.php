@@ -54,6 +54,9 @@ class Connection
             'defaults' => [
                 'auth' => [$access_token, ''],
             ],
+            'headers' => [
+                'User-Agent' => $this->getDefaultUserAgent()
+            ]
         ]);
     }
 
@@ -65,5 +68,24 @@ class Connection
     public function client()
     {
         return $this->client;
+    }
+
+    /**
+     * Get the default User-Agent string to use with Guzzle
+     *
+     * @return string
+     */
+    public static function getDefaultUserAgent()
+    {
+        static $defaultAgent = '';
+        if (!$defaultAgent) {
+            $defaultAgent = 'php-instagram';
+            if (extension_loaded('curl')) {
+                $defaultAgent .= ' curl/' . curl_version()['version'];
+            }
+            $defaultAgent .= ' PHP/' . PHP_VERSION;
+        }
+
+        return $defaultAgent;
     }
 }
